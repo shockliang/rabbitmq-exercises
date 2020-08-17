@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using MediatR;
 using MicroRabbit.Domain.Core.Bus;
 using MicroRabbit.Domain.Core.Commands;
 using MicroRabbit.Domain.Core.Events;
+using Newtonsoft.Json;
+using RabbitMQ.Client;
 
 namespace MicroRabbit.Infra.Bus
 {
@@ -28,7 +31,17 @@ namespace MicroRabbit.Infra.Bus
 
         public void Publish<T>(T @event) where T : Event
         {
-            throw new System.NotImplementedException();
+            var factory = new ConnectionFactory() {HostName = "localhost"};
+            using (var conn = factory.CreateConnection())
+            using (var channel = conn.CreateModel())
+            {
+                var eventName = @event.GetType().Name;
+                channel.QueueDeclare(eventName, false, false, false, null);
+                var message = JsonConvert.SerializeObject(@event);
+                var body = Encoding.UTF8.GetBytes(message);
+                
+                channel.BasicPublish("", eventName, null, body);
+            }
         }
 
         public void Subscribe<T, THandler>() where T : Event where THandler : IEventHandler<T>
