@@ -1,4 +1,5 @@
 using System;
+using MicroRabbit.Domain.Core.Events;
 
 namespace MicroRabbit.Domain.Core.Commands
 {
