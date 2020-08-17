@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using MicroRabbit.Domain.Core.Commands;
 
 namespace MicroRabbit.Domain.Core.Bus
 {
