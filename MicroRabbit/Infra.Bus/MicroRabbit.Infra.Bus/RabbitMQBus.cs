@@ -91,7 +91,22 @@ namespace MicroRabbit.Infra.Bus
             channel.BasicConsume(eventName, true, consumer);
         }
 
-        private Task ConsumerOnReceived(object sender, BasicDeliverEventArgs @event)
+        private async Task ConsumerOnReceived(object sender, BasicDeliverEventArgs e)
+        {
+            var eventName = e.RoutingKey;
+            var message = Encoding.UTF8.GetString(e.Body);
+
+            try
+            {
+                await ProcessEvent(eventName, message).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+        }
+
+        private void ProcessEvent(string eventName, string message)
         {
             throw new NotImplementedException();
         }
