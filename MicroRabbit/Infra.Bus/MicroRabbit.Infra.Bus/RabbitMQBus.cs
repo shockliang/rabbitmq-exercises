@@ -9,6 +9,7 @@ using MicroRabbit.Domain.Core.Commands;
 using MicroRabbit.Domain.Core.Events;
 using Newtonsoft.Json;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 namespace MicroRabbit.Infra.Bus
 {
@@ -73,6 +74,24 @@ namespace MicroRabbit.Infra.Bus
         }
 
         private void StartBasicConsume<T>() where T : Event
+        {
+            var factory = new ConnectionFactory()
+            {
+                HostName = "localhost",
+                DispatchConsumersAsync = true
+            };
+
+            var conn = factory.CreateConnection();
+            var channel = conn.CreateModel();
+            var eventName = typeof(T).Name;
+
+            channel.QueueDeclare(eventName, false, false, false, null);
+            var consumer = new AsyncEventingBasicConsumer(channel);
+            consumer.Received += ConsumerOnReceived;
+            channel.BasicConsume(eventName, true, consumer);
+        }
+
+        private Task ConsumerOnReceived(object sender, BasicDeliverEventArgs @event)
         {
             throw new NotImplementedException();
         }
