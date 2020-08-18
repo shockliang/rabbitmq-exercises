@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
@@ -46,7 +47,34 @@ namespace MicroRabbit.Infra.Bus
 
         public void Subscribe<T, THandler>() where T : Event where THandler : IEventHandler<T>
         {
-            throw new System.NotImplementedException();
+            var eventName = typeof(T).Name;
+            var handlerType = typeof(THandler);
+
+            if (!_eventTypes.Contains(typeof(T)))
+            {
+                _eventTypes.Add(typeof(T));
+            }
+
+            if (!_handlers.ContainsKey(eventName))
+            {
+                _handlers.Add(eventName, new List<Type>());
+            }
+
+            if (_handlers[eventName].Any(s => s.GetType() == handlerType))
+            {
+                throw new ArgumentException(
+                    $"Handler Type {handlerType} already is registered for {eventName}", 
+                    nameof(handlerType));
+            }
+            
+            _handlers[eventName].Add(handlerType);
+
+            StartBasicConsume<T>();
+        }
+
+        private void StartBasicConsume<T>() where T : Event
+        {
+            throw new NotImplementedException();
         }
     }
 }
