@@ -95,7 +95,7 @@ namespace MicroRabbit.Infra.Bus
         {
             var eventName = e.RoutingKey;
             var message = Encoding.UTF8.GetString(e.Body.ToArray());
-
+            
             try
             {
                 await ProcessEvent(eventName, message).ConfigureAwait(false);
